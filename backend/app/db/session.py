@@ -1,13 +1,19 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import os
+from backend.app.core.config import settings
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://app_user:change_me@localhost:5433/petclinic"
+# NeonDB requires psycopg3 (psycopg) — swap dialect from postgresql to postgresql+psycopg
+_db_url = settings.DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
+
+engine = create_engine(
+    _db_url,
+    echo=settings.ENVIRONMENT == "development",
+    pool_pre_ping=True,       # detect stale connections (important for NeonDB serverless)
+    pool_recycle=300,         # recycle connections every 5 min
+    connect_args={
+        "sslmode": "require",
+    },
 )
-
-engine = create_engine(DATABASE_URL, echo=False)
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -16,7 +22,6 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()

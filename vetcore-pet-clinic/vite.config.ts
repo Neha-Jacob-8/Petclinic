@@ -12,12 +12,26 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
-        }
-      }
+        },
+      },
+      // VITE_ prefixed vars are automatically exposed — no extra config needed.
+      // This ensures a clean production build output.
+      build: {
+        outDir: 'dist',
+        sourcemap: false,
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              vendor: ['react', 'react-dom', 'react-router-dom'],
+              charts: ['recharts'],
+            },
+          },
+        },
+      },
     };
 });

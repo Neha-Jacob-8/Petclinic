@@ -22,6 +22,7 @@ env.bak/
 venv.bak/
 .venv
 clinic/
+
 # ----------------------------
 # Environment & Secrets
 # ----------------------------
@@ -30,6 +31,7 @@ clinic/
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
 
 # ----------------------------
 # IDE / Editor
@@ -59,3 +61,13 @@ Thumbs.db
 # Docker Data
 # ----------------------------
 pg_data/
+
+# ----------------------------
+# Misc junk
+# ----------------------------
+screen.png
+tobe_done.md
+todo.md
+test_validators.py
+AI_STUDIO_PROMPT.md
+package-lock.json

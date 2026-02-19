@@ -1,26 +1,34 @@
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: petclinic
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: change_me
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     ports:
-      - "5433:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+    env_file:
+      - backend/.env
     networks:
       - internal
-    # IMPORTANT: no "ports:" here → not exposed
+    restart: unless-stopped
 
-  redis:
-    image: redis:7
+  frontend:
+    build:
+      context: ./vetcore-pet-clinic
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
     networks:
       - internal
-    # IMPORTANT: no "ports:" here → not exposed
-
-volumes:
-  pg_data:
+    restart: unless-stopped
 
 networks:
   internal:

@@ -22,6 +22,7 @@ def dashboard_summary(db: Session) -> dict:
 
     total_revenue_today = (
         db.query(func.coalesce(func.sum(Invoice.final_amount), 0))
+        .select_from(Invoice)
         .join(Appointment, Appointment.id == Invoice.appointment_id)
         .filter(
             Appointment.appointment_date == today,
@@ -56,6 +57,7 @@ def revenue_report(db: Session, start: date, end: date) -> dict:
             Appointment.appointment_date.label("date"),
             func.sum(Invoice.final_amount).label("amount"),
         )
+        .select_from(Invoice)
         .join(Appointment, Appointment.id == Invoice.appointment_id)
         .filter(
             Appointment.appointment_date >= start,

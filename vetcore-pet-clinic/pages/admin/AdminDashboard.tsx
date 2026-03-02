@@ -25,19 +25,41 @@ export const AdminDashboard: React.FC = () => {
       const startStr = fmt(thirtyDaysAgo);
       const endStr = fmt(today);
 
-      // Fetch each independently so one failure doesn't blank everything
-      try { const r = await api.get('/reports/dashboard'); setStats(r.data); } catch (e) { console.error("Dashboard stats failed", e); }
-      try { const r = await api.get(`/reports/revenue?start=${startStr}&end=${endStr}`); setRevenue(r.data.data || []); } catch (e) { console.error("Revenue failed", e); }
-      try { const r = await api.get(`/reports/services?start=${startStr}&end=${endStr}`); setServices(r.data || []); } catch (e) { console.error("Services failed", e); }
+      // Fetch each report independently so one failure doesn't blank all charts
+      try {
+        const r = await api.get('/reports/dashboard');
+        setStats(r.data);
+      } catch (e) {
+        console.error("Dashboard stats failed", e);
+      }
+
+      try {
+        const r = await api.get(`/reports/revenue?start=${startStr}&end=${endStr}`);
+        setRevenue(r.data?.data || []);
+      } catch (e) {
+        console.error("Revenue failed", e);
+      }
+
+      try {
+        const r = await api.get(`/reports/services?start=${startStr}&end=${endStr}`);
+        setServices(r.data || []);
+      } catch (e) {
+        console.error("Services failed", e);
+      }
+
       try {
         const r = await api.get(`/reports/appointments?start=${startStr}&end=${endStr}`);
         const a = r.data as AppointmentStats;
-        setApptStats([
-          { name: 'Completed', value: a.completed, color: '#10B981' },
-          { name: 'Scheduled', value: a.scheduled, color: '#3B82F6' },
-          { name: 'Cancelled', value: a.cancelled, color: '#EF4444' },
-        ]);
-      } catch (e) { console.error("Appointments failed", e); }
+        if (a) {
+          setApptStats([
+            { name: 'Completed', value: a.completed ?? 0, color: '#10B981' },
+            { name: 'Scheduled', value: a.scheduled ?? 0, color: '#3B82F6' },
+            { name: 'Cancelled', value: a.cancelled ?? 0, color: '#EF4444' },
+          ]);
+        }
+      } catch (e) {
+        console.error("Appointments failed", e);
+      }
 
       setLoading(false);
     };

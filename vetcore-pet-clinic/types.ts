@@ -177,3 +177,22 @@ export interface NotificationSendRequest {
   channel: string;
   message: string;
 }
+
+export interface ExpiryAlertItem {
+  id: number;
+  name: string;
+  category?: string;
+  quantity: number;
+  unit?: string;
+  expiry_date?: string;
+  days_until_expiry: number;
+  alert_level: 'expired' | 'critical' | 'warning' | 'upcoming';
+}
+
+export interface ExpiryAlertSummary {
+  expired: ExpiryAlertItem[];
+  critical: ExpiryAlertItem[];
+  warning: ExpiryAlertItem[];
+  upcoming: ExpiryAlertItem[];
+  total_alerts: number;
+}

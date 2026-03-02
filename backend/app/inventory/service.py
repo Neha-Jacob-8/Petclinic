@@ -25,7 +25,11 @@ def get_all_items(
         q = q.filter(InventoryItem.category == category)
     if low_stock:
         q = q.filter(InventoryItem.quantity <= InventoryItem.reorder_level)
-    return q.order_by(InventoryItem.name).all()
+    # Sort: nearest expiry first; items with no expiry date go last
+    return q.order_by(
+        InventoryItem.expiry_date.asc().nulls_last(),
+        InventoryItem.name.asc(),
+    ).all()
 
 
 def update_item(db: Session, item_id: int, **kwargs) -> InventoryItem:
@@ -83,3 +87,63 @@ def get_expiring_items(db: Session, days: int = 30) -> List[InventoryItem]:
         .order_by(InventoryItem.expiry_date)
         .all()
     )
+
+
+def get_expiry_alerts(db: Session) -> dict:
+    """Return inventory items grouped by expiry severity.
+
+    Levels:
+      expired  — already past expiry_date
+      critical — expiring within 7 days
+      warning  — expiring within 8–30 days
+      upcoming — expiring within 31–90 days
+    """
+    today = date.today()
+
+    items_with_expiry = (
+        db.query(InventoryItem)
+        .filter(InventoryItem.expiry_date.isnot(None))
+        .order_by(InventoryItem.expiry_date.asc())
+        .all()
+    )
+
+    expired: list = []
+    critical: list = []  # 0–7 days
+    warning: list = []   # 8–30 days
+    upcoming: list = []  # 31–90 days
+
+    for item in items_with_expiry:
+        delta = (item.expiry_date - today).days
+        if delta < 0:
+            level = "expired"
+            expired.append(_alert_dict(item, delta, level))
+        elif delta <= 7:
+            level = "critical"
+            critical.append(_alert_dict(item, delta, level))
+        elif delta <= 30:
+            level = "warning"
+            warning.append(_alert_dict(item, delta, level))
+        elif delta <= 90:
+            level = "upcoming"
+            upcoming.append(_alert_dict(item, delta, level))
+
+    return {
+        "expired": expired,
+        "critical": critical,
+        "warning": warning,
+        "upcoming": upcoming,
+        "total_alerts": len(expired) + len(critical) + len(warning) + len(upcoming),
+    }
+
+
+def _alert_dict(item: InventoryItem, days_until_expiry: int, alert_level: str) -> dict:
+    return {
+        "id": item.id,
+        "name": item.name,
+        "category": item.category,
+        "quantity": item.quantity,
+        "unit": item.unit,
+        "expiry_date": item.expiry_date,
+        "days_until_expiry": days_until_expiry,
+        "alert_level": alert_level,
+    }

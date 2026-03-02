@@ -95,3 +95,27 @@ class InventoryLogResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ──────────── EXPIRY ALERTS ────────────
+
+class ExpiryAlertItem(BaseModel):
+    id: int
+    name: str
+    category: Optional[str]
+    quantity: int
+    unit: Optional[str]
+    expiry_date: Optional[date]
+    days_until_expiry: int
+    alert_level: str  # expired / critical / warning / upcoming
+
+    class Config:
+        from_attributes = True
+
+
+class ExpiryAlertSummary(BaseModel):
+    expired: list[ExpiryAlertItem]
+    critical: list[ExpiryAlertItem]
+    warning: list[ExpiryAlertItem]
+    upcoming: list[ExpiryAlertItem]
+    total_alerts: int

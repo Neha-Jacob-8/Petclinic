@@ -12,6 +12,7 @@ from backend.app.inventory.schemas import (
     InventoryItemResponse,
     StockChange,
     InventoryLogResponse,
+    ExpiryAlertSummary,
 )
 from backend.app.inventory.service import (
     create_item,
@@ -20,6 +21,7 @@ from backend.app.inventory.service import (
     adjust_stock,
     get_item_logs,
     get_expiring_items,
+    get_expiry_alerts,
 )
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
@@ -76,6 +78,17 @@ def item_logs(
     current_user: StaffUser = Depends(require_admin),
 ):
     return get_item_logs(db, item_id)
+
+
+@router.get("/expiry-alerts", response_model=ExpiryAlertSummary)
+def expiry_alerts(
+    db: Session = Depends(get_db),
+    current_user: StaffUser = Depends(get_current_user),
+):
+    """Return inventory items grouped by expiry severity.
+    Levels: expired / critical (≤7d) / warning (≤30d) / upcoming (≤90d).
+    """
+    return get_expiry_alerts(db)
 
 
 @router.get("/expiring", response_model=List[InventoryItemResponse])

@@ -20,8 +20,10 @@ export const AdminDashboard: React.FC = () => {
       const today = new Date();
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(today.getDate() - 30);
-      const startStr = thirtyDaysAgo.toISOString().split('T')[0];
-      const endStr = today.toISOString().split('T')[0];
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const startStr = fmt(thirtyDaysAgo);
+      const endStr = fmt(today);
 
       // Fetch each independently so one failure doesn't blank everything
       try { const r = await api.get('/reports/dashboard'); setStats(r.data); } catch (e) { console.error("Dashboard stats failed", e); }

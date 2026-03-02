@@ -112,8 +112,8 @@ def appointments_report(db: Session, start: date, end: date) -> dict:
     total = q.count()
     completed = q.filter(Appointment.status == "completed").count()
     cancelled = q.filter(Appointment.status == "cancelled").count()
+    scheduled = q.filter(Appointment.status == "scheduled").count()
     walk_in = q.filter(Appointment.type == "walk-in").count()
-    scheduled = q.filter(Appointment.type == "scheduled").count()
 
     return {
         "total": total,

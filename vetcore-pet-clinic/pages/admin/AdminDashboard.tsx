@@ -123,25 +123,27 @@ export const AdminDashboard: React.FC = () => {
         {/* Revenue Chart */}
         <div className="lg:col-span-2">
           <Card className="h-96">
-            <h3 className="text-lg font-heading font-semibold text-slate-800 mb-6">Revenue Overview (Last 30 Days)</h3>
+            <h3 className="text-lg font-heading font-semibold text-slate-800 mb-4">Revenue Overview (Last 30 Days)</h3>
             {revenue.length > 0 ? (
-              <ResponsiveContainer width="100%" height="80%">
-                <AreaChart data={revenue}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0D9488" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748B' }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B' }} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                  />
-                  <Area type="monotone" dataKey="amount" stroke="#0D9488" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenue}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0D9488" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B' }} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                    />
+                    <Area type="monotone" dataKey="amount" stroke="#0D9488" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="flex items-center justify-center h-64 text-slate-400">No revenue data yet</div>
             )}
@@ -151,27 +153,29 @@ export const AdminDashboard: React.FC = () => {
         {/* Appointment Distribution */}
         <div>
           <Card className="h-96">
-            <h3 className="text-lg font-heading font-semibold text-slate-800 mb-6">Appointments Status</h3>
+            <h3 className="text-lg font-heading font-semibold text-slate-800 mb-4">Appointments Status</h3>
             {apptStats.some(s => s.value > 0) ? (
-              <ResponsiveContainer width="100%" height="80%">
-                <PieChart>
-                  <Pie
-                    data={apptStats}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {apptStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={apptStats}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {apptStats.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend verticalAlign="bottom" height={36} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
               <div className="flex items-center justify-center h-64 text-slate-400">No appointment data yet</div>
             )}

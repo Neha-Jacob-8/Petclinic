@@ -126,14 +126,3 @@ def reset_staff_password_route(
         new_password=payload.new_password,
     )
     return {"message": "Password reset successfully"}
-
-
-@router.post("/seed-demo-data")
-def run_seed(current_admin: StaffUser = Depends(require_admin)):
-    """One-time endpoint — seeds the DB with demo data. Admin only."""
-    try:
-        from backend.seed import seed
-        seed()
-        return {"message": "Demo data seeded successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))

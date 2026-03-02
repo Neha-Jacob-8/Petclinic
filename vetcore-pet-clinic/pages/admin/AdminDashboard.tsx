@@ -17,35 +17,27 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      const startStr = thirtyDaysAgo.toISOString().split('T')[0];
+      const endStr = today.toISOString().split('T')[0];
+
+      // Fetch each independently so one failure doesn't blank everything
+      try { const r = await api.get('/reports/dashboard'); setStats(r.data); } catch (e) { console.error("Dashboard stats failed", e); }
+      try { const r = await api.get(`/reports/revenue?start=${startStr}&end=${endStr}`); setRevenue(r.data.data || []); } catch (e) { console.error("Revenue failed", e); }
+      try { const r = await api.get(`/reports/services?start=${startStr}&end=${endStr}`); setServices(r.data || []); } catch (e) { console.error("Services failed", e); }
       try {
-        const today = new Date();
-        const thirtyDaysAgo = new Date(today);
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        const startStr = thirtyDaysAgo.toISOString().split('T')[0];
-        const endStr = today.toISOString().split('T')[0];
-
-        const [statsRes, revenueRes, servicesRes, apptsRes] = await Promise.all([
-          api.get('/reports/dashboard'),
-          api.get(`/reports/revenue?start=${startStr}&end=${endStr}`),
-          api.get(`/reports/services?start=${startStr}&end=${endStr}`),
-          api.get(`/reports/appointments?start=${startStr}&end=${endStr}`),
-        ]);
-
-        setStats(statsRes.data);
-        setRevenue(revenueRes.data.data || []);
-        setServices(servicesRes.data || []);
-
-        const a = apptsRes.data as AppointmentStats;
+        const r = await api.get(`/reports/appointments?start=${startStr}&end=${endStr}`);
+        const a = r.data as AppointmentStats;
         setApptStats([
           { name: 'Completed', value: a.completed, color: '#10B981' },
           { name: 'Scheduled', value: a.scheduled, color: '#3B82F6' },
           { name: 'Cancelled', value: a.cancelled, color: '#EF4444' },
         ]);
-      } catch (err) {
-        console.error("Failed to load dashboard data", err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (e) { console.error("Appointments failed", e); }
+
+      setLoading(false);
     };
     fetchData();
   }, []);

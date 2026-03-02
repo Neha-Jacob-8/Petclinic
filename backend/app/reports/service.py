@@ -22,8 +22,9 @@ def dashboard_summary(db: Session) -> dict:
 
     total_revenue_today = (
         db.query(func.coalesce(func.sum(Invoice.final_amount), 0))
+        .join(Appointment, Appointment.id == Invoice.appointment_id)
         .filter(
-            cast(Invoice.created_at, Date) == today,
+            Appointment.appointment_date == today,
             Invoice.payment_status == "paid",
         )
         .scalar()
@@ -52,16 +53,17 @@ def dashboard_summary(db: Session) -> dict:
 def revenue_report(db: Session, start: date, end: date) -> dict:
     rows = (
         db.query(
-            cast(Invoice.created_at, Date).label("date"),
+            Appointment.appointment_date.label("date"),
             func.sum(Invoice.final_amount).label("amount"),
         )
+        .join(Appointment, Appointment.id == Invoice.appointment_id)
         .filter(
-            cast(Invoice.created_at, Date) >= start,
-            cast(Invoice.created_at, Date) <= end,
+            Appointment.appointment_date >= start,
+            Appointment.appointment_date <= end,
             Invoice.payment_status == "paid",
         )
-        .group_by(cast(Invoice.created_at, Date))
-        .order_by(cast(Invoice.created_at, Date))
+        .group_by(Appointment.appointment_date)
+        .order_by(Appointment.appointment_date)
         .all()
     )
 
@@ -79,9 +81,10 @@ def services_report(db: Session, start: date, end: date) -> list:
         )
         .join(InvoiceItem, InvoiceItem.service_id == Service.id)
         .join(Invoice, Invoice.id == InvoiceItem.invoice_id)
+        .join(Appointment, Appointment.id == Invoice.appointment_id)
         .filter(
-            cast(Invoice.created_at, Date) >= start,
-            cast(Invoice.created_at, Date) <= end,
+            Appointment.appointment_date >= start,
+            Appointment.appointment_date <= end,
         )
         .group_by(Service.name)
         .order_by(func.sum(InvoiceItem.quantity).desc())

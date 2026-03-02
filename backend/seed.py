@@ -190,7 +190,7 @@ def seed():
                 obj = Pet(owner_id=owner.id, name=pname, species=species, breed=breed, age=age)
                 db.add(obj)
                 db.flush()
-            pet_objs.append((obj, owner))
+            pet_objs.append((owner, obj))  # (owner, pet) — matches make_appt signature
         db.flush()
         print(f"  + {len(pet_objs)} pets ready")
 
